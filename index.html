@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Randomizador agentes Valorant</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #0b1220;
+            --accent: #7c3aed;
+            --muted: #94a3b8;
+            --text: #e6eef8;
+        }
+
+        body {
+            font-family: Inter, sans-serif;
+            margin: 0;
+            background: linear-gradient(180deg, #071028 0%, #071229 60%);
+            color: var(--text);
+            padding: 28px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        p.lead {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            padding: 14px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+            margin-bottom: 12px;
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: transparent;
+            color: var(--text);
+            outline: none;
+            font-size: 14px;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+
+        .remove-btn:hover {
+            color: #ffb4b4;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button.ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text);
+        }
+
+        .assignment {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .danger {
+            color: #ffb4b4;
+        }
+
+        footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Randomizador agentes Valorant</h1>
+            <p class="lead">Escribe los nombres del equipo y define la composición de roles.</p>
+        </header>
+        <div class="card">
+            <label>Nombres del equipo</label>
+            <div id="teamInputs"></div>
+            <button id="addPlayerBtn" class="ghost" style="margin-top:8px;">+ Añadir jugador</button>
+        </div>
+        <div class="card">
+            <label>
+                <input type="checkbox" id="useRolesCheckbox"> Usar composición de roles
+            </label>
+            <div id="roleConfig" style="display:none; margin-top: 8px;"></div>
+            <p class="small">Puedes ajustar cuántos jugadores de cada rol habrá en el equipo.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button id="assignBtn">Asignar agentes</button>
+            <button id="exportBtn" class="ghost" style="display: none;">Copiar</button>
+            <div style="margin-left:auto" id="status" class="small"></div>
+        </div>
+        <div class="card" id="resultCard">
+            <label>Asignaciones</label>
+            <div id="results"></div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const roles = {
+                "Duelista": ["Jett", "Phoenix", "Reyna", "Raze", "Yoru", "Neon"],
+                "Centinela": ["Sage", "Killjoy", "Cypher", "Chamber", "Deadlock"],
+                "Controlador": ["Brimstone", "Viper", "Omen", "Astra", "Harbor"],
+                "Iniciador": ["Sova", "Breach", "Skye", "Fade", "KAY/O", "Gekko"]
+            };
+            let playerCount = 5;
+            const teamInputsDiv = document.getElementById('teamInputs');
+            const addPlayerBtn = document.getElementById('addPlayerBtn');
+            const resultsDiv = document.getElementById('results');
+            const statusDiv = document.getElementById('status');
+            const roleConfigDiv = document.getElementById('roleConfig');
+            const useRolesCheckbox = document.getElementById('useRolesCheckbox');
+            function renderPlayers(names = []) {
+                teamInputsDiv.innerHTML = '';
+                if (Array.isArray(names) && names.length > 0) {
+                    playerCount = Math.min(Math.max(names.length, 1), 5);
+                } else {
+                    playerCount = playerCount || 5;
+                    if (playerCount > 5) playerCount = 5;
+                }
+                for (let i = 0; i < playerCount; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'player-row';
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = `Jugador ${i + 1}`;
+                    input.value = names[i] || `Jug${i + 1}`;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.textContent = '✖';
+                    removeBtn.addEventListener('click', (e) => {
+                        const rowEl = e.currentTarget.closest('.player-row');
+                        const index = Array.from(teamInputsDiv.children).indexOf(rowEl);
+                        const inputs = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'));
+                        if (inputs.length <= 1) return;
+                        const remaining = inputs.map(i => i.value).filter(Boolean);
+                        remaining.splice(index, 1);
+                        playerCount = remaining.length;
+                        renderPlayers(remaining);
+                    });
+                    row.appendChild(input);
+                    row.appendChild(removeBtn);
+                    teamInputsDiv.appendChild(row);
+                }
+                addPlayerBtn.style.display = playerCount < 5 ? 'inline-block' : 'none';
+            }
+            addPlayerBtn.onclick = () => {
+                if (playerCount < 5) {
+                    const currentNames = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'))
+                        .map(i => i.value.trim());
+                    playerCount++;
+                    renderPlayers(currentNames);
+                }
+            };
+            function renderRoleConfig() {
+                roleConfigDiv.innerHTML = '';
+                for (const role in roles) {
+                    const div = document.createElement('div');
+                    div.className = 'player-row';
+                    const label = document.createElement('label');
+                    label.textContent = role;
+                    label.style.width = '120px';
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = 0;
+                    input.max = 5;
+                    input.value = 1;
+                    input.id = `role-${role}`;
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    roleConfigDiv.appendChild(div);
+                }
+            }
+            useRolesCheckbox.addEventListener('change', () => {
+                roleConfigDiv.style.display = useRolesCheckbox.checked ? 'block' : 'none';
+            });
+            const params = new URLSearchParams(window.location.search);
+            const raw = params.get('jugadores') || params.get('names') || params.get('players');
+            let jugadoresLista = [];
+            if (raw) {
+                jugadoresLista = raw.split(/[;,|]+/)
+                    .map(s => decodeURIComponent(s).trim())
+                    .filter(Boolean);
+            }
+            const countParam = parseInt(params.get('count') || params.get('num') || '', 10);
+            if (jugadoresLista.length > 0) {
+                renderPlayers(jugadoresLista);
+            } else if (!isNaN(countParam)) {
+                playerCount = Math.min(Math.max(countParam, 1), 5);
+                renderPlayers();
+            } else {
+                playerCount = 5;
+                renderPlayers();
+            }
+            renderRoleConfig();
+            function shuffle(arr) {
+                const a = arr.slice();
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+            function getTeamNames() {
+                return Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'))
+                    .map((i, idx) => i.value.trim() || `Jugador ${idx + 1}`);
+            }
+            function getRoleByAgent(agent) {
+                for (const role in roles) {
+                    if (roles[role].includes(agent)) return role;
+                }
+                return 'Desconocido';
+            }
+            function renderAssignments(names, agents) {
+                resultsDiv.innerHTML = '';
+                names.forEach((name, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'assignment';
+                    const left = `<div><strong>${name}</strong><div class="small">Jugador ${idx + 1}</div></div>`;
+                    const right = `<div style="text-align:right"><strong>${agents[idx]}</strong><div class="small">${getRoleByAgent(agents[idx])}</div></div>`;
+                    row.innerHTML = left + right;
+                    resultsDiv.appendChild(row);
+                });
+            }
+            function assignAgents() {
+                statusDiv.textContent = '';
+                const team = getTeamNames();
+                const selectedAgents = [];
+                if (useRolesCheckbox.checked) {
+                    const composition = {};
+                    let totalNeeded = 0;
+                    for (const role in roles) {
+                        const val = parseInt(document.getElementById(`role-${role}`).value) || 0;
+                        composition[role] = val;
+                        totalNeeded += val;
+                    }
+                    if (totalNeeded !== team.length) {
+                        statusDiv.innerHTML = `<span class="danger">Error: la suma de roles (${totalNeeded}) debe coincidir con el número de jugadores (${team.length}).</span>`;
+                        return;
+                    }
+                    let agentPool = Object.entries(roles)
+                        .filter(([role]) => composition[role] > 0)
+                        .flatMap(([role, agents]) => agents.map(a => ({ agent: a, role })));
+                    const roleCounts = {};
+                    for (let player of team) {
+                        if (agentPool.length === 0) {
+                            statusDiv.innerHTML = `<span class="danger">Error: no hay suficientes agentes disponibles.</span>`;
+                            return;
+                        }
+                        const idx = Math.floor(Math.random() * agentPool.length);
+                        const { agent, role } = agentPool[idx];
+                        roleCounts[role] = (roleCounts[role] || 0) + 1;
+                        if (roleCounts[role] >= composition[role]) {
+                            agentPool = agentPool.filter(a => a.role !== role);
+                        } else {
+                            agentPool.splice(idx, 1);
+                        }
+                        selectedAgents.push({ name: player, agent, role });
+                    }
+                } else {
+                    const allAgents = Object.values(roles).flat();
+                    if (team.length > allAgents.length) {
+                        statusDiv.innerHTML = `<span class="danger">Error: más jugadores que agentes disponibles.</span>`;
+                        return;
+                    }
+                    const shuffled = shuffle(allAgents);
+                    for (let i = 0; i < team.length; i++) {
+                        selectedAgents.push({ name: team[i], agent: shuffled[i], role: getRoleByAgent(shuffled[i]) });
+                    }
+                }
+                resultsDiv.innerHTML = '';
+                selectedAgents.forEach((a, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'assignment';
+                    const left = `<div><strong>${a.name}</strong><div class="small">Jugador ${idx + 1}</div></div>`;
+                    const right = `<div style="text-align:right"><strong>${a.agent}</strong><div class="small">${a.role}</div></div>`;
+                    row.innerHTML = left + right;
+                    resultsDiv.appendChild(row);
+                });
+                statusDiv.textContent = 'Asignación creada — ' + new Date().toLocaleTimeString();
+                document.getElementById('exportBtn').style.display = 'inline-block';
+            }
+            document.getElementById('assignBtn').onclick = assignAgents;
+            document.getElementById('exportBtn').onclick = async () => {
+                const div = document.getElementById('resultCard');
+                statusDiv.textContent = 'Generando imagen...';
+                try {
+                    const canvas = await html2canvas(div, { backgroundColor: null });
+                    canvas.toBlob(async (blob) => {
+                        if (!blob) return;
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            statusDiv.textContent = 'Imagen copiada al portapapeles 🎉';
+                        } catch (err) {
+                            console.error(err);
+                            statusDiv.textContent = 'Error: no se pudo copiar al portapapeles';
+                        }
+                    });
+                } catch (err) {
+                    console.error(err);
+                    statusDiv.textContent = 'Error generando la imagen';
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>
