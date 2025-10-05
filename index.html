@@ -180,43 +180,37 @@
             const useRolesCheckbox = document.getElementById('useRolesCheckbox');
             function renderPlayers(names = []) {
                 teamInputsDiv.innerHTML = '';
-                if (Array.isArray(names) && names.length > 0) {
-                    playerCount = Math.min(Math.max(names.length, 1), 5);
-                } else {
-                    playerCount = playerCount || 5;
-                    if (playerCount > 5) playerCount = 5;
-                }
-                for (let i = 0; i < playerCount; i++) {
+                playerCount = names.length || 1;
+                names.forEach((name, i) => {
                     const row = document.createElement('div');
                     row.className = 'player-row';
+
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = `Jugador ${i + 1}`;
-                    input.value = names[i] || `Jug${i + 1}`;
+                    input.value = name || `Jug${i + 1}`;
+
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'remove-btn';
                     removeBtn.textContent = '✖';
                     removeBtn.addEventListener('click', (e) => {
-                        const rowEl = e.currentTarget.closest('.player-row');
-                        const index = Array.from(teamInputsDiv.children).indexOf(rowEl);
-                        const inputs = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'));
-                        if (inputs.length <= 1) return;
-                        const remaining = inputs.map(i => i.value).filter(Boolean);
+                        const index = Array.from(teamInputsDiv.children).indexOf(row);
+                        const remaining = names.slice();
                         remaining.splice(index, 1);
-                        playerCount = remaining.length;
                         renderPlayers(remaining);
                     });
+
                     row.appendChild(input);
                     row.appendChild(removeBtn);
                     teamInputsDiv.appendChild(row);
-                }
+                });
                 addPlayerBtn.style.display = playerCount < 5 ? 'inline-block' : 'none';
             }
             addPlayerBtn.onclick = () => {
-                if (playerCount < 5) {
-                    const currentNames = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'))
-                        .map(i => i.value.trim());
-                    playerCount++;
+                const inputs = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'));
+                if (inputs.length < 5) {
+                    const currentNames = inputs.map(i => i.value.trim());
+                    currentNames.push(`Jug${currentNames.length + 1}`);
                     renderPlayers(currentNames);
                 }
             };
