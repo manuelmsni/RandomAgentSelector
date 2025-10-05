@@ -25,7 +25,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1500px;
             margin: 0 auto;
         }
 
@@ -52,7 +52,7 @@
             margin-bottom: 12px;
         }
 
-        label {
+        label, .heading {
             font-size: 13px;
             color: var(--muted);
             display: block;
@@ -115,6 +115,8 @@
             padding: 10px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.02);
+            flex-direction: column;
+            background: #1a222d;
         }
 
         .small {
@@ -125,12 +127,48 @@
         .danger {
             color: #ffb4b4;
         }
-        
+
         footer {
             margin-top: 18px;
             color: var(--muted);
             font-size: 13px;
             text-align: center;
+        }
+
+        #results {      
+            display: flex;
+            flex-direction: row;
+            column-gap: 1rem;
+            justify-content: space-around;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-direction: column;
+        }
+
+        .agent-info > div {   
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-direction: column;
+            width: 100%;
+            background: #303a43;
+            padding: .5rem;
+            margin: 0;
+            box-sizing: border-box;
+            border: 1px solid white;
+        }
+
+        .agent-info img {
+            width: 100%;
+            object-fit: contain;
+            aspect-ratio: 270 / 355;
+            margin: 0;
+            padding: 0;
+            object-position: bottom;
         }
     </style>
 </head>
@@ -141,7 +179,7 @@
             <p class="lead">Escribe los nombres del equipo y define la composición de roles.</p>
         </header>
         <div class="card">
-            <label>Nombres del equipo</label>
+            <p class="heading">Nombres del equipo</p>
             <div id="teamInputs"></div>
             <button id="addPlayerBtn" class="ghost" style="margin-top:8px;">+ Añadir jugador</button>
         </div>
@@ -158,7 +196,6 @@
             <div style="margin-left:auto" id="status" class="small"></div>
         </div>
         <div class="card" id="resultCard">
-            <label>Asignaciones</label>
             <div id="results"></div>
         </div>
     </div>
@@ -166,36 +203,39 @@
 document.addEventListener("DOMContentLoaded", () => {
     const roles = {
         "Duelista": {
-            "Jett": "https://static.wikia.nocookie.net/valorant/images/3/35/Jett_icon.png/revision/latest/scale-to-width-down/75?cb=20230909031447",
-            "Phoenix": "https://static.wikia.nocookie.net/valorant/images/1/14/Phoenix_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161016",
-            "Reyna": "https://static.wikia.nocookie.net/valorant/images/b/b0/Reyna_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161102",
-            "Raze": "https://static.wikia.nocookie.net/valorant/images/9/9c/Raze_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180834",
-            "Yoru": "https://static.wikia.nocookie.net/valorant/images/f/f0/KAYO_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180711",
-            "Neon": "https://static.wikia.nocookie.net/valorant/images/d/d0/Neon_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180744"
+            "Jett": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/d41286dc9017bf79c0b4d907b7a260c27b0adb69-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Phoenix": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/47387e354c34d51b84066bc47af3c5755b92b9c5-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Reyna": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/7cb513c9b3eae3286449776e85753138436d553c-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Raze": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/40b4b242b68afe30d21e7f95bdcacaebca46ea60-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Yoru": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/05e1a996814dd10d7179efee327d29a7be00e912-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Neon": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/14145d7bf9be17afa80c04ee4fbe200076cc1769-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Waylay": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/11c2b158d932076d3215749a34b7b4209b48ce44-587x900.png?auto=format&fit=fill&q=80&w=352"
         },
         "Centinela": {
-            "Sage": "https://static.wikia.nocookie.net/valorant/images/7/74/Sage_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161159",
-            "Killjoy": "https://static.wikia.nocookie.net/valorant/images/1/15/Killjoy_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180727",
-            "Cypher": "https://static.wikia.nocookie.net/valorant/images/8/88/Cypher_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180623",
-            "Chamber": "https://static.wikia.nocookie.net/valorant/images/0/09/Chamber_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180616",
-            "Deadlock": "https://static.wikia.nocookie.net/valorant/images/e/eb/Deadlock_icon.png/revision/latest/scale-to-width-down/75?cb=20230627132804"
+            "Sage": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/58a180961a14beb631877921e647c233804853c1-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Killjoy": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/820d36d431fff77b1e1ece39ad6f007746bd31f6-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Cypher": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4a648cdbcbbeef137050deefeaf6a1369c606666-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Chamber": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/0f5b668b77499c0051201389d6ac5e7343c9727f-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Deadlock": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/477284dfe402a85abcf6b07512bcd6f01c8fe60e-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Vyse": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/370e4b820670ef0bac7e685f6e8c5e64d19f1890-587x900.png?auto=format&fit=fill&q=80&w=352"
         },
         "Controlador": {
-            "Brimstone": "https://static.wikia.nocookie.net/valorant/images/4/4d/Brimstone_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180558",
-            "Viper": "https://static.wikia.nocookie.net/valorant/images/5/5f/Viper_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180950",
-            "Omen": "https://static.wikia.nocookie.net/valorant/images/b/b0/Omen_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180801",
-            "Astra": "https://static.wikia.nocookie.net/valorant/images/0/08/Astra_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180525",
-            "Harbor": "https://static.wikia.nocookie.net/valorant/images/f/f3/Harbor_icon.png/revision/latest/scale-to-width-down/75?cb=20230523161242"
+            "Brimstone": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/51e62f3c74356a7501d06feba42ac643133257d7-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Viper": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/152244f121e61ca32bdd2bea9fc5370e315664fb-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Omen": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/015a083717e9687de8a741cfceddb836775b5f9f-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Astra": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/ba51d43803082941b0274b66413b0acc972546dd-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Harbor": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/1246b5c517f6c8fa660e884a7032c1c54994003e-616x822.png?auto=format&fit=fill&q=80&w=352"
         },
         "Iniciador": {
-            "Sova": "https://static.wikia.nocookie.net/valorant/images/4/49/Sova_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180933",
-            "Breach": "https://static.wikia.nocookie.net/valorant/images/5/53/Breach_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180542",
-            "Skye": "https://static.wikia.nocookie.net/valorant/images/3/33/Skye_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161546",
-            "Fade": "https://static.wikia.nocookie.net/valorant/images/a/a6/Fade_icon.png/revision/latest/scale-to-width-down/75?cb=20230523161332",
-            "KAY/O": "https://static.wikia.nocookie.net/valorant/images/f/f0/KAYO_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180711",
-            "Gekko": "https://static.wikia.nocookie.net/valorant/images/6/66/Gekko_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180641"
+            "Sova": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/08b3d8822544bd327ebed0768c8b90fcec83d1a5-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Breach": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/e435c3378b7999a3338b408dbb5da8ba63f91150-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Skye": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/37ea1466beebb54aad4f16efbad184566cb80368-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Fade": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/e7099cc13a665ed2b556d514e50984393ed49967-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "KAY/O": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/fe52e0efac73ec782b19a54e98a4658b03677407-616x822.png?auto=format&fit=fill&q=80&w=352",
+            "Gekko": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/8d88f133f735f6a9077679b1ece754e5624c728e-616x822.png?auto=format&fit=fill&q=80&w=352"
         } 
     };
+
     let playerCount = 5;
     const teamInputsDiv = document.getElementById('teamInputs');
     const addPlayerBtn = document.getElementById('addPlayerBtn');
@@ -345,13 +385,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const row = document.createElement('div');
             row.className = 'assignment';
             row.innerHTML = `
-                <div><strong>${a.name}</strong><div class="small">Jugador ${idx + 1}</div></div>
-                <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
-                    <div style="display: flex; align-items: flex-end; gap:6px; flex-direction: column; align-content: flex-end;">
+                <div><strong>${a.name}</strong></div>
+                <div class="agent-info">
+                    <img src="${a.icon}" alt="${a.agent}">
+                    <div>
                         <strong>${a.agent}</strong>
-                        <div class="small" style="display: flex; align-items: flex-end; gap:6px; flex-direction: column; align-content: flex-end;">${a.role}</div>
+                        <div class="small" style="display: flex; align-items: center; gap:6px; flex-direction: column; align-content: flex-end;">${a.role}</div>
                     </div>
-                    <img src="${a.icon}" alt="${a.agent}" style="height:30px; width:30px; object-fit:contain;">
                 </div>
             `;
             resultsDiv.appendChild(row);
