@@ -125,7 +125,7 @@
         .danger {
             color: #ffb4b4;
         }
-
+        
         footer {
             margin-top: 18px;
             color: var(--muted);
@@ -134,7 +134,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <header>
@@ -163,210 +162,237 @@
             <div id="results"></div>
         </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const roles = {
-                "Duelista": ["Jett", "Phoenix", "Reyna", "Raze", "Yoru", "Neon"],
-                "Centinela": ["Sage", "Killjoy", "Cypher", "Chamber", "Deadlock"],
-                "Controlador": ["Brimstone", "Viper", "Omen", "Astra", "Harbor"],
-                "Iniciador": ["Sova", "Breach", "Skye", "Fade", "KAY/O", "Gekko"]
-            };
-            let playerCount = 5;
-            const teamInputsDiv = document.getElementById('teamInputs');
-            const addPlayerBtn = document.getElementById('addPlayerBtn');
-            const resultsDiv = document.getElementById('results');
-            const statusDiv = document.getElementById('status');
-            const roleConfigDiv = document.getElementById('roleConfig');
-            const useRolesCheckbox = document.getElementById('useRolesCheckbox');
-            function renderPlayers(names = []) {
-                teamInputsDiv.innerHTML = '';
-                playerCount = names.length || 1;
-                names.forEach((name, i) => {
-                    const row = document.createElement('div');
-                    row.className = 'player-row';
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const roles = {
+        "Duelista": {
+            "Jett": "https://static.wikia.nocookie.net/valorant/images/3/35/Jett_icon.png/revision/latest/scale-to-width-down/75?cb=20230909031447",
+            "Phoenix": "https://static.wikia.nocookie.net/valorant/images/1/14/Phoenix_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161016",
+            "Reyna": "https://static.wikia.nocookie.net/valorant/images/b/b0/Reyna_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161102",
+            "Raze": "https://static.wikia.nocookie.net/valorant/images/9/9c/Raze_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180834",
+            "Yoru": "https://static.wikia.nocookie.net/valorant/images/f/f0/KAYO_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180711",
+            "Neon": "https://static.wikia.nocookie.net/valorant/images/d/d0/Neon_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180744"
+        },
+        "Centinela": {
+            "Sage": "https://static.wikia.nocookie.net/valorant/images/7/74/Sage_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161159",
+            "Killjoy": "https://static.wikia.nocookie.net/valorant/images/1/15/Killjoy_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180727",
+            "Cypher": "https://static.wikia.nocookie.net/valorant/images/8/88/Cypher_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180623",
+            "Chamber": "https://static.wikia.nocookie.net/valorant/images/0/09/Chamber_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180616",
+            "Deadlock": "https://static.wikia.nocookie.net/valorant/images/e/eb/Deadlock_icon.png/revision/latest/scale-to-width-down/75?cb=20230627132804"
+        },
+        "Controlador": {
+            "Brimstone": "https://static.wikia.nocookie.net/valorant/images/4/4d/Brimstone_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180558",
+            "Viper": "https://static.wikia.nocookie.net/valorant/images/5/5f/Viper_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180950",
+            "Omen": "https://static.wikia.nocookie.net/valorant/images/b/b0/Omen_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180801",
+            "Astra": "https://static.wikia.nocookie.net/valorant/images/0/08/Astra_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180525",
+            "Harbor": "https://static.wikia.nocookie.net/valorant/images/f/f3/Harbor_icon.png/revision/latest/scale-to-width-down/75?cb=20230523161242"
+        },
+        "Iniciador": {
+            "Sova": "https://static.wikia.nocookie.net/valorant/images/4/49/Sova_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180933",
+            "Breach": "https://static.wikia.nocookie.net/valorant/images/5/53/Breach_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180542",
+            "Skye": "https://static.wikia.nocookie.net/valorant/images/3/33/Skye_icon.png/revision/latest/scale-to-width-down/75?cb=20230606161546",
+            "Fade": "https://static.wikia.nocookie.net/valorant/images/a/a6/Fade_icon.png/revision/latest/scale-to-width-down/75?cb=20230523161332",
+            "KAY/O": "https://static.wikia.nocookie.net/valorant/images/f/f0/KAYO_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180711",
+            "Gekko": "https://static.wikia.nocookie.net/valorant/images/6/66/Gekko_icon.png/revision/latest/scale-to-width-down/75?cb=20230523180641"
+        } 
+    };
+    let playerCount = 5;
+    const teamInputsDiv = document.getElementById('teamInputs');
+    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const resultsDiv = document.getElementById('results');
+    const statusDiv = document.getElementById('status');
+    const roleConfigDiv = document.getElementById('roleConfig');
+    const useRolesCheckbox = document.getElementById('useRolesCheckbox');
+    function renderPlayers(names = []) {
+        teamInputsDiv.innerHTML = '';
+        playerCount = names.length || 1;
+        names.forEach((name, i) => {
+            const row = document.createElement('div');
+            row.className = 'player-row';
 
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.placeholder = `Jugador ${i + 1}`;
-                    input.value = name || `Jug${i + 1}`;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = `Jugador ${i + 1}`;
+            input.value = name || `Jug${i + 1}`;
 
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-btn';
-                    removeBtn.textContent = '✖';
-                    removeBtn.addEventListener('click', (e) => {
-                        const index = Array.from(teamInputsDiv.children).indexOf(row);
-                        const remaining = names.slice();
-                        remaining.splice(index, 1);
-                        renderPlayers(remaining);
-                    });
-
-                    row.appendChild(input);
-                    row.appendChild(removeBtn);
-                    teamInputsDiv.appendChild(row);
-                });
-                addPlayerBtn.style.display = playerCount < 5 ? 'inline-block' : 'none';
-            }
-            addPlayerBtn.onclick = () => {
-                const inputs = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'));
-                if (inputs.length < 5) {
-                    const currentNames = inputs.map(i => i.value.trim());
-                    currentNames.push(`Jug${currentNames.length + 1}`);
-                    renderPlayers(currentNames);
-                }
-            };
-            function renderRoleConfig() {
-                roleConfigDiv.innerHTML = '';
-                for (const role in roles) {
-                    const div = document.createElement('div');
-                    div.className = 'player-row';
-                    const label = document.createElement('label');
-                    label.textContent = role;
-                    label.style.width = '120px';
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.min = 0;
-                    input.max = 5;
-                    input.value = 1;
-                    input.id = `role-${role}`;
-                    div.appendChild(label);
-                    div.appendChild(input);
-                    roleConfigDiv.appendChild(div);
-                }
-            }
-            useRolesCheckbox.addEventListener('change', () => {
-                roleConfigDiv.style.display = useRolesCheckbox.checked ? 'block' : 'none';
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = '✖';
+            removeBtn.addEventListener('click', () => {
+                const remaining = names.slice();
+                remaining.splice(i, 1);
+                renderPlayers(remaining);
             });
-            const params = new URLSearchParams(window.location.search);
-            const raw = params.get('jugadores') || params.get('names') || params.get('players');
-            let jugadoresLista = [];
-            if (raw) {
-                jugadoresLista = raw.split(/[;,|]+/)
-                    .map(s => decodeURIComponent(s).trim())
-                    .filter(Boolean);
+
+            row.appendChild(input);
+            row.appendChild(removeBtn);
+            teamInputsDiv.appendChild(row);
+        });
+        addPlayerBtn.style.display = playerCount < 5 ? 'inline-block' : 'none';
+    }
+    addPlayerBtn.onclick = () => {
+        const inputs = Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'));
+        if (inputs.length < 5) {
+            const currentNames = inputs.map(i => i.value.trim());
+            currentNames.push(`Jug${currentNames.length + 1}`);
+            renderPlayers(currentNames);
+        }
+    };
+    function renderRoleConfig() {
+        roleConfigDiv.innerHTML = '';
+        for (const role in roles) {
+            const div = document.createElement('div');
+            div.className = 'player-row';
+            const label = document.createElement('label');
+            label.textContent = role;
+            label.style.width = '120px';
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = 0;
+            input.max = 5;
+            input.value = 1;
+            input.id = `role-${role}`;
+            div.appendChild(label);
+            div.appendChild(input);
+            roleConfigDiv.appendChild(div);
+        }
+    }
+    useRolesCheckbox.addEventListener('change', () => {
+        roleConfigDiv.style.display = useRolesCheckbox.checked ? 'block' : 'none';
+    });
+    function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+    function getTeamNames() {
+        return Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'))
+            .map((i, idx) => i.value.trim() || `Jugador ${idx + 1}`);
+    }
+    function getRoleByAgent(agentName) {
+        for (const role in roles) {
+            if (roles[role][agentName]) return role;
+        }
+        return 'Desconocido';
+    }
+    function getIconByAgent(agentName) {
+        for (const role in roles) {
+            if (roles[role][agentName]) return roles[role][agentName];
+        }
+        return '';
+    }
+    useRolesCheckbox.addEventListener('change', () => {
+        roleConfigDiv.style.display = useRolesCheckbox.checked ? 'block' : 'none';
+    });
+    renderRoleConfig();
+    function assignAgents() {
+        statusDiv.textContent = '';
+        const team = getTeamNames();
+        const selectedAgents = [];
+        if (useRolesCheckbox.checked) {
+            const composition = {};
+            let totalNeeded = 0;
+            for (const role in roles) {
+                const val = parseInt(document.getElementById(`role-${role}`).value) || 0;
+                composition[role] = val;
+                totalNeeded += val;
             }
-            const countParam = parseInt(params.get('count') || params.get('num') || '', 10);
-            if (jugadoresLista.length > 0) {
-                renderPlayers(jugadoresLista);
-            } else if (!isNaN(countParam)) {
-                playerCount = Math.min(Math.max(countParam, 1), 5);
-                renderPlayers();
-            } else {
-                playerCount = 5;
-                renderPlayers();
+            if (totalNeeded !== team.length) {
+                statusDiv.innerHTML = `<span class="danger">Error: la suma de roles (${totalNeeded}) debe coincidir con el número de jugadores (${team.length}).</span>`;
+                return;
             }
-            renderRoleConfig();
-            function shuffle(arr) {
-                const a = arr.slice();
-                for (let i = a.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]];
+            let agentPool = Object.entries(roles)
+                .filter(([role]) => composition[role] > 0)
+                .flatMap(([role, agentsObj]) => Object.keys(agentsObj).map(agent => ({ agent, role })));
+
+            const roleCounts = {};
+            for (let player of team) {
+                if (agentPool.length === 0) {
+                    statusDiv.innerHTML = `<span class="danger">Error: no hay suficientes agentes disponibles.</span>`;
+                    return;
                 }
-                return a;
-            }
-            function getTeamNames() {
-                return Array.from(teamInputsDiv.querySelectorAll('input[type="text"]'))
-                    .map((i, idx) => i.value.trim() || `Jugador ${idx + 1}`);
-            }
-            function getRoleByAgent(agent) {
-                for (const role in roles) {
-                    if (roles[role].includes(agent)) return role;
-                }
-                return 'Desconocido';
-            }
-            function renderAssignments(names, agents) {
-                resultsDiv.innerHTML = '';
-                names.forEach((name, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'assignment';
-                    const left = `<div><strong>${name}</strong><div class="small">Jugador ${idx + 1}</div></div>`;
-                    const right = `<div style="text-align:right"><strong>${agents[idx]}</strong><div class="small">${getRoleByAgent(agents[idx])}</div></div>`;
-                    row.innerHTML = left + right;
-                    resultsDiv.appendChild(row);
-                });
-            }
-            function assignAgents() {
-                statusDiv.textContent = '';
-                const team = getTeamNames();
-                const selectedAgents = [];
-                if (useRolesCheckbox.checked) {
-                    const composition = {};
-                    let totalNeeded = 0;
-                    for (const role in roles) {
-                        const val = parseInt(document.getElementById(`role-${role}`).value) || 0;
-                        composition[role] = val;
-                        totalNeeded += val;
-                    }
-                    if (totalNeeded !== team.length) {
-                        statusDiv.innerHTML = `<span class="danger">Error: la suma de roles (${totalNeeded}) debe coincidir con el número de jugadores (${team.length}).</span>`;
-                        return;
-                    }
-                    let agentPool = Object.entries(roles)
-                        .filter(([role]) => composition[role] > 0)
-                        .flatMap(([role, agents]) => agents.map(a => ({ agent: a, role })));
-                    const roleCounts = {};
-                    for (let player of team) {
-                        if (agentPool.length === 0) {
-                            statusDiv.innerHTML = `<span class="danger">Error: no hay suficientes agentes disponibles.</span>`;
-                            return;
-                        }
-                        const idx = Math.floor(Math.random() * agentPool.length);
-                        const { agent, role } = agentPool[idx];
-                        roleCounts[role] = (roleCounts[role] || 0) + 1;
-                        if (roleCounts[role] >= composition[role]) {
-                            agentPool = agentPool.filter(a => a.role !== role);
-                        } else {
-                            agentPool.splice(idx, 1);
-                        }
-                        selectedAgents.push({ name: player, agent, role });
-                    }
+                const idx = Math.floor(Math.random() * agentPool.length);
+                const { agent, role } = agentPool[idx];
+                roleCounts[role] = (roleCounts[role] || 0) + 1;
+                if (roleCounts[role] >= composition[role]) {
+                    agentPool = agentPool.filter(a => a.role !== role);
                 } else {
-                    const allAgents = Object.values(roles).flat();
-                    if (team.length > allAgents.length) {
-                        statusDiv.innerHTML = `<span class="danger">Error: más jugadores que agentes disponibles.</span>`;
-                        return;
-                    }
-                    const shuffled = shuffle(allAgents);
-                    for (let i = 0; i < team.length; i++) {
-                        selectedAgents.push({ name: team[i], agent: shuffled[i], role: getRoleByAgent(shuffled[i]) });
-                    }
+                    agentPool.splice(idx, 1);
                 }
-                resultsDiv.innerHTML = '';
-                selectedAgents.forEach((a, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'assignment';
-                    const left = `<div><strong>${a.name}</strong><div class="small">Jugador ${idx + 1}</div></div>`;
-                    const right = `<div style="text-align:right"><strong>${a.agent}</strong><div class="small">${a.role}</div></div>`;
-                    row.innerHTML = left + right;
-                    resultsDiv.appendChild(row);
-                });
-                statusDiv.textContent = 'Asignación creada — ' + new Date().toLocaleTimeString();
-                document.getElementById('exportBtn').style.display = 'inline-block';
+                selectedAgents.push({ name: player, agent, role, icon: getIconByAgent(agent) });
             }
-            document.getElementById('assignBtn').onclick = assignAgents;
-            document.getElementById('exportBtn').onclick = async () => {
-                const div = document.getElementById('resultCard');
-                statusDiv.textContent = 'Generando imagen...';
+        } else {
+            const allAgents = Object.values(roles).flatMap(a => Object.keys(a));
+            if (team.length > allAgents.length) {
+                statusDiv.innerHTML = `<span class="danger">Error: más jugadores que agentes disponibles.</span>`;
+                return;
+            }
+            const shuffled = shuffle(allAgents);
+            for (let i = 0; i < team.length; i++) {
+                selectedAgents.push({
+                    name: team[i],
+                    agent: shuffled[i],
+                    role: getRoleByAgent(shuffled[i]),
+                    icon: getIconByAgent(shuffled[i])
+                });
+            }
+        }
+        resultsDiv.innerHTML = '';
+        selectedAgents.forEach((a, idx) => {
+            const row = document.createElement('div');
+            row.className = 'assignment';
+            row.innerHTML = `
+                <div><strong>${a.name}</strong><div class="small">Jugador ${idx + 1}</div></div>
+                <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                    <div style="display: flex; align-items: flex-end; gap:6px; flex-direction: column; align-content: flex-end;">
+                        <strong>${a.agent}</strong>
+                        <div class="small" style="display: flex; align-items: flex-end; gap:6px; flex-direction: column; align-content: flex-end;">${a.role}</div>
+                    </div>
+                    <img src="${a.icon}" alt="${a.agent}" style="height:30px; width:30px; object-fit:contain;">
+                </div>
+            `;
+            resultsDiv.appendChild(row);
+        });
+
+        statusDiv.textContent = 'Asignación creada — ' + new Date().toLocaleTimeString();
+        document.getElementById('exportBtn').style.display = 'inline-block';
+    }
+    document.getElementById('assignBtn').onclick = assignAgents;
+    document.getElementById('exportBtn').onclick = async () => {
+        const div = document.getElementById('resultCard');
+        statusDiv.textContent = 'Generando imagen...';
+        try {
+            const canvas = await html2canvas(div, { backgroundColor: null });
+            canvas.toBlob(async (blob) => {
+                if (!blob) return;
                 try {
-                    const canvas = await html2canvas(div, { backgroundColor: null });
-                    canvas.toBlob(async (blob) => {
-                        if (!blob) return;
-                        try {
-                            await navigator.clipboard.write([
-                                new ClipboardItem({ 'image/png': blob })
-                            ]);
-                            statusDiv.textContent = 'Imagen copiada al portapapeles 🎉';
-                        } catch (err) {
-                            console.error(err);
-                            statusDiv.textContent = 'Error: no se pudo copiar al portapapeles';
-                        }
-                    });
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    statusDiv.textContent = 'Imagen copiada al portapapeles 🎉';
                 } catch (err) {
                     console.error(err);
-                    statusDiv.textContent = 'Error generando la imagen';
+                    statusDiv.textContent = 'Error: no se pudo copiar al portapapeles';
                 }
-            };
-        });
-    </script>
-</body>
+            });
+        } catch (err) {
+            console.error(err);
+            statusDiv.textContent = 'Error generando la imagen';
+        }
+    };
+    function getPlayersFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const jugadoresParam = params.get('jugadores');
+        if (!jugadoresParam) return [];
+        return jugadoresParam.split(';').map(j => j.trim()).filter(j => j.length);
+    }
 
+    const initialPlayers = getPlayersFromUrl();
+    renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
+});
+</script>
+</body>
 </html>
