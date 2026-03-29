@@ -608,8 +608,8 @@ const { jugadores: initialPlayers, roles: initialRoles } = getPlayersAndRolesFro
 
 await loadAgents();
     
-renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
-renderRoleConfig(initialRoles);
+await renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
+await renderRoleConfig(initialRoles);
 updateShareUrl();
 
 teamInputsDiv.addEventListener('input', updateShareUrl);
