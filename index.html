@@ -309,14 +309,20 @@ function limitRolesInputs() {
     const teamSize = getTeamNames().length;
     const roleInputs = Array.from(roleConfigDiv.querySelectorAll('input[type="number"]'));
     let total = roleInputs.reduce((sum, input) => sum + Number(input.value), 0);
-    roleInputs.forEach(input => {
-        let current = Number(input.value);
-        let maxAllowed = current + (teamSize - total);
-        input.max = maxAllowed;
-        if (current > maxAllowed) {
-            input.value = maxAllowed;
-            total = roleInputs.reduce((sum, input) => sum + Number(input.value), 0);
+    if (total > teamSize) {
+        for (let i = roleInputs.length - 1; i >= 0 && total > teamSize; i--) {
+            let val = Number(roleInputs[i].value);
+            let excess = total - teamSize;
+            if (val > 0) {
+                let reduceBy = Math.min(val, excess);
+                roleInputs[i].value = val - reduceBy;
+                total -= reduceBy;
+            }
         }
+    }
+    total = roleInputs.reduce((sum, input) => sum + Number(input.value), 0);
+    roleInputs.forEach(input => {
+        input.max = Number(input.value) + (teamSize - total);
     });
     updateShareUrl();
 }
