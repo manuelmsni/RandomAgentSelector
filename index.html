@@ -339,24 +339,36 @@ function shuffle(arr) {
 
 function updateShareUrl() {
     const teamNames = getTeamNames();
+    console.log("DEBUG - teamNames:", teamNames);
+
     const jugadoresParam = teamNames.map(name => encodeURIComponent(name)).join(';');
+    console.log("DEBUG - jugadoresParam:", jugadoresParam);
 
     let rolesParam = '';
     if (useRolesCheckbox.checked) {
         const roleInputs = Array.from(roleConfigDiv.querySelectorAll('input[type="number"]'));
+        console.log("DEBUG - roleInputs encontrados:", roleInputs);
+
         rolesParam = roleInputs
             .map(input => {
-                const roleName = input.id.replace('role-', ''); // nombre limpio
-                const value = Number(input.value) || 0;        // asegurar número
+                const roleName = input.id.replace('role-', '');
+                const value = Number(input.value) || 0;
+                console.log("DEBUG - role:", roleName, "value:", value);
                 return `${encodeURIComponent(roleName)}:${value}`;
             })
             .join(';');
+
+        console.log("DEBUG - rolesParam:", rolesParam);
+    } else {
+        console.log("DEBUG - checkbox de roles no está activado");
     }
 
     const baseUrl = window.location.origin + window.location.pathname;
     const url = rolesParam
         ? `${baseUrl}?jugadores=${jugadoresParam}&roles=${rolesParam}`
         : `${baseUrl}?jugadores=${jugadoresParam}`;
+
+    console.log("DEBUG - URL final:", url);
 
     document.getElementById('shareUrl').value = url;
 }
