@@ -398,25 +398,51 @@ function renderAssignments(){
     exportBtn.style.display='inline-block';
 }
 
-// --- Export ---
-exportBtn.onclick=async ()=>{
-    const div=document.getElementById('resultCard');
-    statusDiv.textContent='Generando imagen...';
-    try{
-        const canvas=await html2canvas(div,{backgroundColor:null});
-        canvas.toBlob(async blob=>{
-            if(!blob) return;
-            try{
-                await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-                statusDiv.textContent='Imagen copiada al portapapeles 🎉';
-            }catch(err){
+// --- Convertir imagen remota a Base64 ---
+async function imgToBase64(url) {
+    try {
+        const res = await fetch(url, { mode: 'cors' });
+        const blob = await res.blob();
+        return await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    } catch (err) {
+        console.error("Error convirtiendo imagen a Base64:", err);
+        return url; // fallback: dejar la URL original
+    }
+}
+
+
+// --- Export / Copiar ---
+exportBtn.onclick = async () => {
+    const div = document.getElementById('resultCard');
+    statusDiv.textContent = 'Preparando imágenes...';
+    const imgElements = div.querySelectorAll('img');
+    const promises = Array.from(imgElements).map(async img => {
+        if (img.src && !img.src.startsWith('data:')) {
+            img.src = await imgToBase64(img.src);
+        }
+    });
+    try {
+        await Promise.all(promises);
+
+        statusDiv.textContent = 'Generando imagen...';
+        const canvas = await html2canvas(div, { backgroundColor: null, useCORS: true });
+        canvas.toBlob(async blob => {
+            if (!blob) return;
+            try {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                statusDiv.textContent = 'Imagen copiada al portapapeles 🎉';
+            } catch (err) {
                 console.error(err);
-                statusDiv.textContent='Error: no se pudo copiar';
+                statusDiv.textContent = 'Error: no se pudo copiar';
             }
         });
-    }catch(err){
+    } catch (err) {
         console.error(err);
-        statusDiv.textContent='Error generando imagen';
+        statusDiv.textContent = 'Error generando imagen';
     }
 };
 
