@@ -309,7 +309,6 @@ function assignAgents(specificPlayer=null){
     assignedAgents = [];
 
     if(useRolesCheckbox.checked){
-        // convertir todos los valores a números
         const composition = {};
         let totalNeeded = 0;
         for(const role in roles){
@@ -322,25 +321,30 @@ function assignAgents(specificPlayer=null){
             return;
         }
 
-        // construir pool de agentes por rol
+        // pool completo de agentes
         const agentPool = Object.entries(roles).flatMap(([role, agentsObj]) =>
             Object.keys(agentsObj).map(agent => ({ agent, role }))
         );
 
-        // asignar cada jugador
-        team.forEach((player,i) => {
-            if(specificPlayer !== null && i !== specificPlayer) return; // reroll individual
-            const validAgents = agentPool.filter(a => composition[a.role] > 0 && !assignedAgents.find(x => x?.agent === a.agent));
-            if(!validAgents.length){
-                statusDiv.innerHTML = `<span class="danger">No hay agentes suficientes para asignar</span>`;
+        // verificar que cada rol tiene suficientes agentes
+        for(const role in composition){
+            const available = agentPool.filter(a => a.role === role).length;
+            if(composition[role] > available){
+                statusDiv.innerHTML = `<span class="danger">Error: no hay suficientes agentes para el rol "${role}"</span>`;
                 return;
             }
+        }
+
+        // asignar jugadores
+        team.forEach((player,i) => {
+            if(specificPlayer !== null && i !== specificPlayer) return;
+            const validAgents = agentPool.filter(a => composition[a.role] > 0 && !assignedAgents.find(x => x?.agent === a.agent));
             const pick = validAgents[Math.floor(Math.random()*validAgents.length)];
             assignedAgents[i] = { name: player, agent: pick.agent, role: pick.role, icon: getIconByAgent(pick.agent) };
-            composition[pick.role]--; // decrementar para no exceder
+            composition[pick.role]--;
         });
 
-        // llenar los jugadores que no fueron rerolled
+        // llenar los jugadores no rerolled
         for(let i=0;i<team.length;i++){
             if(!assignedAgents[i]){
                 const validAgents = agentPool.filter(a => composition[a.role] > 0 && !assignedAgents.find(x => x?.agent === a.agent));
