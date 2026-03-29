@@ -312,19 +312,17 @@ function limitRolesInputs() {
     if (total > teamSize) {
         for (let i = roleInputs.length - 1; i >= 0 && total > teamSize; i--) {
             let val = Number(roleInputs[i].value);
-            let excess = total - teamSize;
             if (val > 0) {
-                let reduceBy = Math.min(val, excess);
+                let reduceBy = Math.min(val, total - teamSize);
                 roleInputs[i].value = val - reduceBy;
                 total -= reduceBy;
             }
         }
     }
-    total = roleInputs.reduce((sum, input) => sum + Number(input.value), 0);
     roleInputs.forEach(input => {
-        input.max = Number(input.value) + (teamSize - total);
+        const currentVal = Number(input.value);
+        input.max = currentVal + (teamSize - total);
     });
-    updateShareUrl();
 }
 
 // --- Shuffle ---
@@ -610,9 +608,13 @@ await loadAgents();
     
 await renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
 await renderRoleConfig(initialRoles);
+limitRolesInputs();
 
 teamInputsDiv.addEventListener('input', updateShareUrl);
-roleConfigDiv.addEventListener('input', updateShareUrl);
+roleConfigDiv.addEventListener('input', () => {
+    limitRolesInputs();
+    updateShareUrl();
+});
 
 // Si hay roles en la URL, preseleccionarlos
 if (Object.keys(initialRoles).length) {
