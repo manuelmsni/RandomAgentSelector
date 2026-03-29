@@ -345,7 +345,11 @@ function updateShareUrl() {
     if (useRolesCheckbox.checked) {
         const roleInputs = Array.from(roleConfigDiv.querySelectorAll('input[type="number"]'));
         rolesParam = roleInputs
-            .map(input => `${encodeURIComponent(input.id.replace('role-', ''))}:${input.value}`)
+            .map(input => {
+                const roleName = input.id.replace('role-', ''); // nombre limpio
+                const value = Number(input.value) || 0;        // asegurar número
+                return `${encodeURIComponent(roleName)}:${value}`;
+            })
             .join(';');
     }
 
