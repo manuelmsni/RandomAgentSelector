@@ -192,6 +192,8 @@ async function loadAgents() {
             roles[roleES][agent.displayName] = agent.fullPortrait || agent.displayIcon || "";
         });
 
+        console.log("DEBUG API - roles y agentes cargados desde API:", roles);
+
         renderRoleConfig();
     } catch (err) {
         console.error("Error cargando agentes", err);
@@ -437,6 +439,9 @@ function getPlayersAndRolesFromUrl() {
             if(roleName && countStr) rolesFromUrl[roleName] = parseInt(countStr);
         });
     }
+
+    console.log("DEBUG URL - jugadores cargados desde URL:", jugadores);
+    console.log("DEBUG URL - roles cargados desde URL:", rolesFromUrl);
 
     return { jugadores, roles: rolesFromUrl };
 }
