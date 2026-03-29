@@ -268,6 +268,7 @@ function renderPlayers(names = []) {
     });
 
     addPlayerBtn.style.display = playerCount < 5 ? 'inline-block' : 'none';
+    updateShareUrl();
 }
 
 // --- Add player ---
@@ -301,6 +302,23 @@ function renderRoleConfig(initialRoles = {}) {
         div.appendChild(input);
         roleConfigDiv.appendChild(div);
     }
+    updateShareUrl();
+}
+
+function limitRolesInputs() {
+    const teamSize = getTeamNames().length;
+    const roleInputs = Array.from(roleConfigDiv.querySelectorAll('input[type="number"]'));
+    let total = roleInputs.reduce((sum, input) => sum + Number(input.value), 0);
+    roleInputs.forEach(input => {
+        let current = Number(input.value);
+        let maxAllowed = current + (teamSize - total);
+        input.max = maxAllowed;
+        if (current > maxAllowed) {
+            input.value = maxAllowed;
+            total = roleInputs.reduce((sum, input) => sum + Number(input.value), 0);
+        }
+    });
+    updateShareUrl();
 }
 
 // --- Shuffle ---
@@ -311,6 +329,20 @@ function shuffle(arr) {
         [a[i],a[j]]=[a[j],a[i]];
     }
     return a;
+}
+
+function updateShareUrl() {
+    const teamNames = getTeamNames().join(';');
+    let rolesParam = '';
+    if(useRolesCheckbox.checked){
+        const roleInputs = Array.from(roleConfigDiv.querySelectorAll('input[type="number"]'));
+        rolesParam = roleInputs
+            .map(input => `${input.id.replace('role-','')}:${input.value}`)
+            .join(';');
+    }
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = `${baseUrl}?jugadores=${encodeURIComponent(teamNames)}&roles=${encodeURIComponent(rolesParam)}`;
+    document.getElementById('shareUrl').value = url;
 }
 
 // --- Get team names ---
