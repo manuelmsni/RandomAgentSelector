@@ -452,7 +452,10 @@ useRolesCheckbox.addEventListener('change', () => {
 });
 
 const { jugadores: initialPlayers, roles: initialRoles } = getPlayersAndRolesFromUrl();
+
+// Renderizamos jugadores
 renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
+await loadAgents();
 
 // Si hay roles en la URL, preseleccionarlos
 if (Object.keys(initialRoles).length) {
@@ -461,6 +464,7 @@ if (Object.keys(initialRoles).length) {
     Object.entries(initialRoles).forEach(([role, val]) => {
         const input = document.getElementById(`role-${role}`);
         if (input) input.value = val;
+        else console.warn("Role input no encontrado para:", role); // debug
     });
 }
 
