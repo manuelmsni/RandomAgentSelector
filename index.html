@@ -408,21 +408,32 @@ exportBtn.onclick=async ()=>{
 };
 
 // --- URL parsing ---
-function getPlayersFromUrl(){
+function getPlayersFromUrl() {
     const params = new URLSearchParams(window.location.search);
+    // Jugadores
     const jugadoresParam = params.get('jugadores');
+    const jugadores = jugadoresParam
+        ? jugadoresParam.split(';').map(j => j.trim()).filter(j => j.length)
+        : [];
+    // Roles con formato Rol:Cantidad
     const rolesParam = params.get('roles');
-    return {
-        players: jugadoresParam? jugadoresParam.split(';').map(j=>j.trim()).filter(j=>j.length):[],
-        roles: rolesParam? rolesParam.split(';').map(r=>r.trim()):[]
-    };
+    if (rolesParam) {
+        const rolePairs = rolesParam.split(';');
+        rolePairs.forEach(pair => {
+            const [roleName, countStr] = pair.split(':').map(p => p.trim());
+            if (roleName && countStr && document.getElementById(`role-${roleName}`)) {
+                document.getElementById(`role-${roleName}`).value = parseInt(countStr);
+            }
+        });
+    }
+    return jugadores;
 }
 
 // --- Initialize ---
 useRolesCheckbox.addEventListener('change',()=>{roleConfigDiv.style.display=useRolesCheckbox.checked?'block':'none';});
 await loadAgents();
-const urlData=getPlayersFromUrl();
-renderPlayers(urlData.players.length?urlData.players:['Jugador 1']);
+const initialPlayers = getPlayersFromUrl();
+renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
 if(urlData.roles.length){
     useRolesCheckbox.checked=true;
     roleConfigDiv.style.display='block';
