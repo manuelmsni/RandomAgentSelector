@@ -407,43 +407,48 @@ exportBtn.onclick=async ()=>{
     }
 };
 
-// --- URL parsing ---
-function getPlayersFromUrl() {
+// --- Obtener jugadores y roles desde URL ---
+function getPlayersAndRolesFromUrl() {
     const params = new URLSearchParams(window.location.search);
     // Jugadores
     const jugadoresParam = params.get('jugadores');
     const jugadores = jugadoresParam
         ? jugadoresParam.split(';').map(j => j.trim()).filter(j => j.length)
         : [];
-    // Roles con formato Rol:Cantidad
+    // Roles en formato NombreRol:Cantidad
+    const rolesFromUrl = {};
     const rolesParam = params.get('roles');
     if (rolesParam) {
         const rolePairs = rolesParam.split(';');
         rolePairs.forEach(pair => {
             const [roleName, countStr] = pair.split(':').map(p => p.trim());
             if (roleName && countStr && document.getElementById(`role-${roleName}`)) {
-                document.getElementById(`role-${roleName}`).value = parseInt(countStr);
+                rolesFromUrl[roleName] = parseInt(countStr);
             }
         });
     }
-    return jugadores;
+    return { jugadores, roles: rolesFromUrl };
 }
 
 // --- Initialize ---
-useRolesCheckbox.addEventListener('change',()=>{roleConfigDiv.style.display=useRolesCheckbox.checked?'block':'none';});
-await loadAgents();
-const initialPlayers = getPlayersFromUrl();
+useRolesCheckbox.addEventListener('change', () => {
+    roleConfigDiv.style.display = useRolesCheckbox.checked ? 'block' : 'none';
+});
+
+const { jugadores: initialPlayers, roles: initialRoles } = getPlayersAndRolesFromUrl();
 renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
-if(initialPlayers.roles.length){
-    useRolesCheckbox.checked=true;
-    roleConfigDiv.style.display='block';
-    Object.keys(roles).forEach((role,i)=>{
-        const val = parseInt(initialPlayers.roles[i])||0;
-        document.getElementById(`role-${role}`).value=val;
+
+// Si hay roles en la URL, preseleccionarlos
+if (Object.keys(initialRoles).length) {
+    useRolesCheckbox.checked = true;
+    roleConfigDiv.style.display = 'block';
+    Object.entries(initialRoles).forEach(([role, val]) => {
+        const input = document.getElementById(`role-${role}`);
+        if (input) input.value = val;
     });
 }
 
-assignBtn.onclick=()=>assignAgents();
+assignBtn.onclick = () => assignAgents();
 
 });
 </script>
