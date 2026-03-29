@@ -434,11 +434,11 @@ useRolesCheckbox.addEventListener('change',()=>{roleConfigDiv.style.display=useR
 await loadAgents();
 const initialPlayers = getPlayersFromUrl();
 renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
-if(urlData.roles.length){
+if(initialPlayers.roles.length){
     useRolesCheckbox.checked=true;
     roleConfigDiv.style.display='block';
     Object.keys(roles).forEach((role,i)=>{
-        const val = parseInt(urlData.roles[i])||0;
+        const val = parseInt(initialPlayers.roles[i])||0;
         document.getElementById(`role-${role}`).value=val;
     });
 }
