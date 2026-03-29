@@ -610,7 +610,6 @@ await loadAgents();
     
 await renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
 await renderRoleConfig(initialRoles);
-updateShareUrl();
 
 teamInputsDiv.addEventListener('input', updateShareUrl);
 roleConfigDiv.addEventListener('input', updateShareUrl);
@@ -627,6 +626,8 @@ if (Object.keys(initialRoles).length) {
 }
 
 assignBtn.onclick = () => assignAgents();
+
+updateShareUrl();
 
 });
 </script>
