@@ -72,18 +72,37 @@ button.ghost {
     border: 1px solid rgba(255, 255, 255, 0.06);
     color: var(--text);
 }
+#results { 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: flex-start;
+}
 .assignment {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     padding: 10px;
     border-radius: 8px;
     background: #1a222d;
-    flex-direction: column;
+    flex: 0 0 calc(20% - 0.8rem); /* 5 elementos por fila menos el gap */
+    box-sizing: border-box;
+}
+@media (max-width: 1200px) {
+    .assignment { flex: 0 0 calc(25% - 0.75rem); } /* 4 por fila */
+}
+@media (max-width: 900px) {
+    .assignment { flex: 0 0 calc(33.33% - 0.66rem); } /* 3 por fila */
+}
+@media (max-width: 600px) {
+    .assignment { flex: 0 0 calc(50% - 0.5rem); } /* 2 por fila */
+}
+@media (max-width: 400px) {
+    .assignment { flex: 0 0 100%; } /* 1 por fila */
 }
 .small { font-size: 13px; color: var(--muted); }
 .danger { color: #ffb4b4; }
-#results { display: flex; flex-direction: row; column-gap: 1rem; justify-content: space-around; flex-wrap: wrap; }
 .agent-info {
     display: flex;
     align-items: center;
@@ -104,7 +123,7 @@ button.ghost {
 }
 .agent-info img {
     width: 100%;
-    object-fit: contain;
+    object-fit: cover;
     aspect-ratio: 270 / 355;
     margin: 0;
     padding: 0;
