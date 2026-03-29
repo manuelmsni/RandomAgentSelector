@@ -339,18 +339,21 @@ function shuffle(arr) {
 
 function updateShareUrl() {
     const teamNames = getTeamNames();
-    let jugadoresParam = teamNames.map(name => encodeURIComponent(name)).join(';');
+    const jugadoresParam = teamNames.map(name => encodeURIComponent(name)).join(';');
+
     let rolesParam = '';
     if (useRolesCheckbox.checked) {
         const roleInputs = Array.from(roleConfigDiv.querySelectorAll('input[type="number"]'));
         rolesParam = roleInputs
-            .map(input => `${input.id.replace('role-', '')}:${input.value}`)
+            .map(input => `${encodeURIComponent(input.id.replace('role-', ''))}:${input.value}`)
             .join(';');
     }
+
     const baseUrl = window.location.origin + window.location.pathname;
     const url = rolesParam
         ? `${baseUrl}?jugadores=${jugadoresParam}&roles=${rolesParam}`
         : `${baseUrl}?jugadores=${jugadoresParam}`;
+
     document.getElementById('shareUrl').value = url;
 }
     
@@ -563,7 +566,7 @@ function getPlayersAndRolesFromUrl() {
     // jugadores
     const jugadoresParam = params.get('jugadores');
     const jugadores = jugadoresParam
-        ? jugadoresParam.split(';').map(j => j.trim()).filter(j => j.length)
+        ? jugadoresParam.split(';').map(j => decodeURIComponent(j.trim())).filter(j => j.length)
         : [];
 
     // roles: NombreRol:Cantidad
@@ -572,12 +575,9 @@ function getPlayersAndRolesFromUrl() {
     if (rolesParam) {
         rolesParam.split(';').forEach(pair => {
             const [roleName, countStr] = pair.split(':').map(p => p.trim());
-            if(roleName && countStr) rolesFromUrl[roleName] = parseInt(countStr);
+            if (roleName && countStr) rolesFromUrl[decodeURIComponent(roleName)] = parseInt(countStr);
         });
     }
-
-    console.log("DEBUG URL - jugadores cargados desde URL:", jugadores);
-    console.log("DEBUG URL - roles cargados desde URL:", rolesFromUrl);
 
     return { jugadores, roles: rolesFromUrl };
 }
