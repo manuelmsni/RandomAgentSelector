@@ -601,6 +601,7 @@ function getPlayersAndRolesFromUrl() {
 // --- Initialize ---
 useRolesCheckbox.addEventListener('change', () => {
     roleConfigDiv.style.display = useRolesCheckbox.checked ? 'block' : 'none';
+    updateShareUrl();
 });
 
 const { jugadores: initialPlayers, roles: initialRoles } = getPlayersAndRolesFromUrl();
@@ -608,8 +609,11 @@ const { jugadores: initialPlayers, roles: initialRoles } = getPlayersAndRolesFro
 await loadAgents();
     
 renderPlayers(initialPlayers.length ? initialPlayers : ['Jugador 1']);
-    
 renderRoleConfig(initialRoles);
+updateShareUrl();
+
+teamInputsDiv.addEventListener('input', updateShareUrl);
+roleConfigDiv.addEventListener('input', updateShareUrl);
 
 // Si hay roles en la URL, preseleccionarlos
 if (Object.keys(initialRoles).length) {
