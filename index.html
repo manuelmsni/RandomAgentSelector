@@ -305,67 +305,106 @@ function getIconByAgent(agentName){
 }
 
 // --- Assign agents ---
-function assignAgents(specificPlayer=null){
-    statusDiv.textContent='';
+function assignAgents(specificPlayer = null){
+    statusDiv.textContent = '';
     const team = getTeamNames();
-    assignedAgents = [];
+
+    // Si no hay asignaciones previas, inicializamos
+    if (!assignedAgents.length) assignedAgents = [];
 
     if(useRolesCheckbox.checked){
-        const composition = {};
-        let totalNeeded = 0;
-        for(const role in roles){
-            const val = parseInt(document.getElementById(`role-${role}`)?.value) || 0;
-            composition[role] = val;
-            totalNeeded += val;
-        }
-        if(totalNeeded !== team.length){
-            statusDiv.innerHTML = `<span class="danger">Error: suma de roles (${totalNeeded}) != jugadores (${team.length})</span>`;
-            return;
-        }
-
-        // pool completo de agentes
+        // Pool completo de agentes
         const agentPool = Object.entries(roles).flatMap(([role, agentsObj]) =>
             Object.keys(agentsObj).map(agent => ({ agent, role }))
         );
 
-        // verificar que cada rol tiene suficientes agentes
-        for(const role in composition){
-            const available = agentPool.filter(a => a.role === role).length;
-            if(composition[role] > available){
-                statusDiv.innerHTML = `<span class="danger">Error: no hay suficientes agentes para el rol "${role}"</span>`;
+        if(specificPlayer !== null){
+            // reroll individual
+            const currentRole = assignedAgents[specificPlayer].role;
+            const takenAgents = assignedAgents.map(a => a?.agent).filter(Boolean);
+            const validAgents = agentPool
+                .filter(a => a.role === currentRole && !takenAgents.includes(a.agent));
+            if(validAgents.length === 0){
+                statusDiv.innerHTML = `<span class="danger">No hay más agentes disponibles para el rol "${currentRole}"</span>`;
                 return;
             }
-        }
-
-        // asignar jugadores
-        team.forEach((player,i) => {
-            if(specificPlayer !== null && i !== specificPlayer) return;
-            const validAgents = agentPool.filter(a => composition[a.role] > 0 && !assignedAgents.find(x => x?.agent === a.agent));
             const pick = validAgents[Math.floor(Math.random()*validAgents.length)];
-            assignedAgents[i] = { name: player, agent: pick.agent, role: pick.role, icon: getIconByAgent(pick.agent) };
-            composition[pick.role]--;
-        });
-
-        // llenar los jugadores no rerolled
-        for(let i=0;i<team.length;i++){
-            if(!assignedAgents[i]){
-                const validAgents = agentPool.filter(a => composition[a.role] > 0 && !assignedAgents.find(x => x?.agent === a.agent));
-                const pick = validAgents[Math.floor(Math.random()*validAgents.length)];
-                assignedAgents[i] = { name: team[i], agent: pick.agent, role: pick.role, icon: getIconByAgent(pick.agent) };
-                composition[pick.role]--;
+            assignedAgents[specificPlayer] = {
+                ...assignedAgents[specificPlayer],
+                agent: pick.agent,
+                icon: getIconByAgent(pick.agent)
+            };
+        } else {
+            // asignación completa
+            const composition = {};
+            let totalNeeded = 0;
+            for(const role in roles){
+                const val = parseInt(document.getElementById(`role-${role}`)?.value) || 0;
+                composition[role] = val;
+                totalNeeded += val;
             }
+            if(totalNeeded !== team.length){
+                statusDiv.innerHTML = `<span class="danger">Error: suma de roles (${totalNeeded}) != jugadores (${team.length})</span>`;
+                return;
+            }
+
+            // verificar disponibilidad
+            for(const role in composition){
+                const available = agentPool.filter(a => a.role === role).length;
+                if(composition[role] > available){
+                    statusDiv.innerHTML = `<span class="danger">Error: no hay suficientes agentes para el rol "${role}"</span>`;
+                    return;
+                }
+            }
+
+            // asignar todos
+            const tempComposition = {...composition};
+            team.forEach((player, i) => {
+                const validAgents = agentPool.filter(a => tempComposition[a.role] > 0 && !assignedAgents.find(x => x?.agent === a.agent));
+                const pick = validAgents[Math.floor(Math.random()*validAgents.length)];
+                assignedAgents[i] = {
+                    name: player,
+                    agent: pick.agent,
+                    role: pick.role,
+                    icon: getIconByAgent(pick.agent)
+                };
+                tempComposition[pick.role]--;
+            });
         }
 
     } else {
+        // modo sin roles
         const allAgents = Object.values(roles).flatMap(a=>Object.keys(a));
         if(team.length > allAgents.length){
             statusDiv.innerHTML = `<span class="danger">Error: más jugadores que agentes disponibles</span>`;
             return;
         }
-        const shuffled = shuffle(allAgents);
-        team.forEach((player,i) => {
-            assignedAgents[i] = { name: player, agent: shuffled[i], role: getRoleByAgent(shuffled[i]), icon: getIconByAgent(shuffled[i]) };
-        });
+
+        if(specificPlayer !== null){
+            const takenAgents = assignedAgents.map(a => a?.agent).filter(Boolean);
+            const validAgents = allAgents.filter(a => !takenAgents.includes(a));
+            if(validAgents.length === 0){
+                statusDiv.innerHTML = `<span class="danger">No hay más agentes disponibles</span>`;
+                return;
+            }
+            const pick = validAgents[Math.floor(Math.random()*validAgents.length)];
+            assignedAgents[specificPlayer] = {
+                ...assignedAgents[specificPlayer],
+                agent: pick,
+                role: getRoleByAgent(pick),
+                icon: getIconByAgent(pick)
+            };
+        } else {
+            const shuffled = shuffle(allAgents);
+            team.forEach((player,i)=>{
+                assignedAgents[i] = {
+                    name: player,
+                    agent: shuffled[i],
+                    role: getRoleByAgent(shuffled[i]),
+                    icon: getIconByAgent(shuffled[i])
+                };
+            });
+        }
     }
 
     renderAssignments();
