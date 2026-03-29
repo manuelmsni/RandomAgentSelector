@@ -25,6 +25,28 @@ body {
 header { margin-bottom: 18px; }
 h1 { font-size: 20px; margin: 0; }
 p.lead { color: var(--muted); font-size: 13px; margin: 0; }
+    .cards-container {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+#teamCard, #roleCard {
+    flex: 1 1 45%;
+}
+@media (max-width: 768px) {
+    #teamCard, #roleCard {
+        flex: 1 1 100%;
+    }
+}
+#shareUrl {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--text);
+    font-size: 14px;
+}
 .card {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
     padding: 14px;
@@ -133,32 +155,40 @@ button.ghost {
 </head>
 <body>
 <div class="container">
-<header>
-    <h1>Randomizador agentes Valorant</h1>
-    <p class="lead">Escribe los nombres del equipo y define la composición de roles.</p>
-</header>
-
-<div class="card">
-    <p class="heading">Nombres del equipo</p>
-    <div id="teamInputs"></div>
-    <button id="addPlayerBtn" class="ghost" style="margin-top:8px;">+ Añadir jugador</button>
-</div>
-
-<div class="card">
-    <label><input type="checkbox" id="useRolesCheckbox"> Usar composición de roles</label>
-    <div id="roleConfig" style="display:none; margin-top: 8px;"></div>
-    <p class="small">Puedes ajustar cuántos jugadores de cada rol habrá en el equipo.</p>
-</div>
-
-<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom: 1rem;">
-    <button id="assignBtn">Asignar agentes</button>
-    <button id="exportBtn" class="ghost" style="display: none;">Copiar</button>
-    <div style="margin-left:auto" id="status" class="small"></div>
-</div>
-
-<div class="card" id="resultCard">
-    <div id="results"></div>
-</div>
+    <header>
+        <h1>Randomizador agentes Valorant</h1>
+        <p class="lead">Escribe los nombres del equipo y define la composición de roles.</p>
+    </header>
+    
+    <div class="cards-container">
+        <div class="card" id="teamCard">
+            <p class="heading">Nombres del equipo</p>
+            <div id="teamInputs"></div>
+            <button id="addPlayerBtn" class="ghost" style="margin-top:8px;">+ Añadir jugador</button>
+        </div>
+    
+        <div class="card" id="roleCard">
+            <label><input type="checkbox" id="useRolesCheckbox"> Usar composición de roles</label>
+            <div id="roleConfig" style="display:none; margin-top: 8px;"></div>
+            <p class="small">Puedes ajustar cuántos jugadores de cada rol habrá en el equipo.</p>
+        </div>
+    </div>
+    
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom: 1rem;">
+        <button id="assignBtn">Asignar agentes</button>
+        <button id="exportBtn" class="ghost" style="display: none;">Copiar</button>
+        <div style="margin-left:auto" id="status" class="small"></div>
+    </div>
+    
+    <div class="card" id="resultCard">
+        <div id="results"></div>
+    </div>
+    
+        <!-- Caja de URL -->
+    <div class="card">
+        <p class="heading">Compartir configuración</p>
+        <input type="text" id="shareUrl" readonly placeholder="La URL aparecerá aquí">
+    </div>
 </div>
 
 <script>
